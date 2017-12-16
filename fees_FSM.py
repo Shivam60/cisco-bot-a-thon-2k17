@@ -8,8 +8,8 @@ class NarcolepticSuperhero(object):
         self.name = name
         questions={
             "initial":"Would You like to Know Academics Fees or Hostel?"
-            "Hostel":"Would You like to Know Mess Fees or Room?"
-
+            "hostel":"Would You like to Know Mess Fees or Room?"
+            "academics":"Which Degree would you like to purse? UnderGraduation or PostGraduation?"
         }
         self.machine = Machine(model=self, states=NarcolepticSuperhero.states, initial='initial')
         self.machine.add_transition(trigger='hostel', source='initial', dest='hostel')
