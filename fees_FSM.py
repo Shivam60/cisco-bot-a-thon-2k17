@@ -15,6 +15,7 @@ class fees_FSM(object):
             "hostel":("mess","room"),
             "academics":(" undergraduation "," postgraduation ")
         }
+
         self.machine = Machine(model=self, states=fees_FSM.states, initial='initial')
         self.machine.add_transition(trigger='hostel', source='initial', dest='hostel')
         self.machine.add_transition(trigger='academics', source='initial', dest='academics')
@@ -26,10 +27,9 @@ class fees_FSM(object):
         while(self.state!='final'):
             answer=raw_input(self.questions[str(self.state)])
             states=self.possible_states[self.state]
-            for i in states:
-                if i in answer:
-                    print(i,answer)
-                    self.state=i
+            for possible_answer in states:
+                if possible_answer in answer:
+                    eval("self."+possible_answer+"()")
                     break
         
 f=fees_FSM("fees")
