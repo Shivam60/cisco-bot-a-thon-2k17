@@ -11,11 +11,11 @@ class fees_FSM(object):
             "academics":"Which Degree would you like to purse? UnderGraduation or PostGraduation?: "
         }
         self.possible_states={
-            "initial":(" hostel "," academics "),
-            "hostel":(" mess "," rooms "),
+            "initial":("hostel","academics"),
+            "hostel":("mess","room"),
             "academics":(" undergraduation "," postgraduation ")
         }
-        self.machine = Machine(model=self, states=NarcolepticSuperhero.states, initial='initial')
+        self.machine = Machine(model=self, states=fees_FSM.states, initial='initial')
         self.machine.add_transition(trigger='hostel', source='initial', dest='hostel')
         self.machine.add_transition(trigger='academics', source='initial', dest='academics')
         self.machine.add_transition(trigger='mess', source='hostel', dest='mess')
@@ -23,12 +23,14 @@ class fees_FSM(object):
         self.machine.add_transition(trigger='undergraduate', source='academics', dest='undergraduation')
         self.machine.add_transition(trigger='postgraduate', source='academics', dest='postgraduayion')
     def dialouge(self):
-        while(self.state!='final'){
-            answer=str(input(self.questions[self.state]))
+        while(self.state!='final'):
+            answer=raw_input(self.questions[str(self.state)])
             states=self.possible_states[self.state]
-            for possible_state in states:
-                if(re.match(i,ans)):
-                    print(i)
-        }
-f=fees_FSM
+            for i in states:
+                if i in answer:
+                    print(i,answer)
+                    self.state=i
+                    break
+        
+f=fees_FSM("fees")
 f.dialouge()
