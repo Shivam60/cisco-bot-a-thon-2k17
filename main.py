@@ -1,4 +1,5 @@
 import pandas as pd,os
+from transitions import Machine
 import nltk,pickle,websocket,time,thread,json,requests,logging
 os.chdir(os.getcwd())
 logging.basicConfig()
@@ -61,15 +62,49 @@ class apiextraction():
 			return  "fallback"
 		else:
 			return dist
+             
+ 
+  
 class bot():
+	class FSM():
+		def __init__(self):
+			states=['fallback','final','hostel','academics','placements','fees','start','exam']
+			self.machine = Machine(model=self, states=fees_FSM.states, initial='start')
+			self.questions={
+				'start':'Hii, How may i help you?',
+				'help':"Sorry, I can't seem to understandyou. Would you like to know the categories I deal with?"
+			}
+			self.possible_states={
+				'start':('academics','placements','fees','exam','hostel','help')
+			}
+			self.machine.add_transition(trigger='academics', source='start', dest='academics')
+			self.machine.add_transition(trigger='placements', source='start', dest='placements')
+			self.machine.add_transition(trigger='fees', source='start', dest='fees')
+			self.machine.add_transition(trigger='exam', source='start', dest='exam')
+			self.machine.add_transition(trigger='hostel', source='start', dest='acadhostelemics')
+			self.machine.add_transition(trigger='help', source='start', dest='help')
+			self.dialouge()
+		def dialouge(self):
+			while(self.state!='final'):
+				self.postmsg(self.questions[str(self.state)])
+				#answer=
+				states=self.possible_states[self.state]
+				for possible_answer in states:
+					if possible_answer in answer:
+						eval("self."+possible_answer+"()")
+						if(self.state == 'final'):
+							print self.questions[str(answer)]
+							break  
 	def __init__(self,botname,key,url):
 		self.botname=botname
 		self.key=key
 		self.url=url
-		self.var1=apiextraction("dataset.csv")		
+		self.name={}
+		self.var1=apiextraction("","yes")		
 		print("Algorithm Trained.")
-		self.var1.save()
-		self.ws = websocket.WebSocketApp(self.url,on_message = self.on_message,on_error = self.on_error,on_close = self.on_close,on_open=self.on_open)
+		#self.var1.save()
+		self.ws = websocket.WebSocketApp(self.url,on_message = self.on_message,on_error = self.on_error,
+		on_close = self.on_close,on_open=self.on_open)
 		print("Bot Running")
 		self.ws.run_forever()
 	def decodemsg(self,msgid):
@@ -81,21 +116,17 @@ class bot():
 		text=response["text"].encode('utf-8')		
 		sender=response["personId"].encode('utf-8')
 		roomid=response["roomId"].encode('utf-8')		
-		return [text,sender,roomid]
-	
+		return [text,sender,roomid]	
 	def postmsg(self,room,text):
 		p = requests.session()
 		p.headers["Content-Type"]="application/json; charset=utf-8"
 		p.headers["Authorization"]="Bearer "+self.key
 		payload={"text":str(text),"markdown":str(text),"roomId":str(room)}
-		res=p.post("https://api.ciscospark.com/v1/messages/",json=payload)
-	
+		res=p.post("https://api.ciscospark.com/v1/messages/",json=payload)	
 	def on_error(self,ws,error):
 		print(error)
-	
 	def on_close(self,ws):
-		print("Bot Stopped")
-		
+		print("Bot Stopped")		
 	def on_message(self,ws,message):
 		try:
 			data=json.loads(message)
@@ -109,9 +140,17 @@ class bot():
 				sender=data["data"]["personEmail"]
 				msgid=data["data"]["id"]
 				decoded=self.decodemsg(msgid)
-				print("Message: "+str(decoded[0])+ "\nSender:  " +str(decoded[1])+"\nRoom:   " +str(decoded[2]))
-				self.postmsg(decoded[2],self.var1.intent(decoded[0]))
-				
+
+				message=str(decoded[0])
+				sender=str(decoded[1])
+				room=str(decoded[2])
+				print("Message: "+message+ "\nSender:  " +sender+"\nRoom:   " +room)
+				#self.postmsg(decoded[2],self.var1.intent(decoded[0]))
+				if sender in self.name.keys:
+					pass
+				else:
+					self.name[sender]='start'
+					mach=FSM()
 	def on_open(self,ws):
 		def run(*args):
 			ws.send("subscribe:"+self.botname)
